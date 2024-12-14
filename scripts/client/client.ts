@@ -3,7 +3,7 @@ const Delay = (time: number) => new Promise(resolve => setTimeout(resolve, time)
 RegisterCommand("sv",async (source:number, args: string[], rawCommand:string) => {
 	const [model] = args
 	const modelHash = GetHashKey(model)
-
+	
 	if (!IsModelAVehicle(modelHash)) return
 	RequestModel(modelHash)
 	while (!HasModelLoaded) await Delay(100)
@@ -16,3 +16,4 @@ RegisterCommand("sv",async (source:number, args: string[], rawCommand:string) =>
 
 	SetPedIntoVehicle(PlayerPedId(), veh, -1)
 }, false)
+

@@ -1,10 +1,25 @@
 fx_version 'cerulean'
-game 'gta5'
+games { 'gta5' }
 
-client_scripts {
-	'build/client/client.js'
-}
+author 'JSP'
+description ''
+version '1.0.0'
+
+lua54 'yes'
 
 server_scripts {
-	'build/server/server.js'
+    'build/server/*.js'
+}
+
+client_scripts {
+    'build/client/*.js'
+}
+
+ui_page 'build/web/index.html'
+
+files {
+  'config.jsonc',
+    'build/web/index.html',
+    'build/web/js/index.js',
+    'build/web/styles/index.css'
 }

@@ -1,3 +1,5 @@
 
 /\[cfx-default\]
 /scripts/node_modules
+[IgnoreMe]/*
+/scripts/web/node_modules
