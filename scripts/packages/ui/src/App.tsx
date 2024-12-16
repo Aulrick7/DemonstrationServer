@@ -20,7 +20,7 @@ debugData(
     {
       action: 'openPage',
       data: {
-        pageName: 'HelloWorld',
+        pageName: 'vehicleSpawn',
       },
     },
   ],

@@ -1,7 +1,9 @@
 import HelloWorld from './helloWorld/HelloWorld'
+import vehicleSpawn from './vehicleSpawn/vehicleSpawn';
 
 const appPages = {
   HelloWorld: HelloWorld,
+  vehicleSpawn: vehicleSpawn,
 }
 
 function generatePageList() {

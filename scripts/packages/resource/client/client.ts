@@ -2,20 +2,20 @@ import { ClientUtils, RegisterNuiCB } from '@project-error/pe-utils'
 
 const rpc = new ClientUtils()
 
-async function main() {
-  const res = await rpc.emitNetPromise('test', {
-    hello: 'from client',
-  })
+const Delay = (time: number) => new Promise(resolve => setTimeout(resolve, time));
 
-  console.log(res)
-}
-RegisterCommand("sv",async (source:number, args: string[], rawCommand:string) => {
-	const [model] = args
+RegisterNuiCB("spawnCar",async (data, cb) => {
+	const model = data.model;
+  if (!data.model) 
+    return cb('No model Provided');
+  if(!model)
+    return console.error('No model Provided');
+  console.log('spawning car', model);
+  
 	const modelHash = GetHashKey(model)
 
-	if (!IsModelAVehicle(modelHash)) return
 	RequestModel(modelHash)
-	while (!HasModelLoaded) await Delay(100)
+	while (!HasModelLoaded) await Delay(500)
 
 	const [x,y,z] = GetEntityCoords(PlayerPedId(), true)
 	const h = GetEntityHeading(PlayerPedId())
@@ -24,15 +24,17 @@ RegisterCommand("sv",async (source:number, args: string[], rawCommand:string) =>
 	while (!DoesEntityExist(veh)) await Delay(100)
 
 	SetPedIntoVehicle(PlayerPedId(), veh, -1)
-}, false)
+  SetEntityAsNoLongerNeeded(veh);
+  SetEntityAsNoLongerNeeded(model);
+});
 
 RegisterCommand(
-  'nuitest',
+  'page',
   () => {
     SendNUIMessage({
       action: 'openPage',
       data: {
-        pageName: 'HelloWorld',
+        pageName: 'vehicleSpawn',
       },
     })
 
@@ -46,7 +48,7 @@ RegisterNuiCB('closeMenu', (_, cb) => {
   SendNUIMessage({
     action: 'closePage',
     data: {
-      pageName: 'HelloWorld',
+      pageName: 'vehicleSpawn',
     },
   })
 
@@ -59,4 +61,5 @@ RegisterNuiCB('getDemoData', (data, cb) => {
   cb({ demo: true, inBrowser: false })
 })
 
-main()
+
+
