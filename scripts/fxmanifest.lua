@@ -1,25 +1,19 @@
 fx_version 'cerulean'
 games { 'gta5' }
 
-author 'JSP'
-description ''
+author 'JEFFe'
+description 'ts react prettier eslint fivem'
 version '1.0.0'
 
-lua54 'yes'
+client_script 'packages/resource/dist/client.js'
 
-server_scripts {
-    'build/server/*.js'
-}
-
-client_scripts {
-    'build/client/*.js'
-}
-
-ui_page 'build/web/index.html'
+server_script 'packages/resource/dist/server.js'
 
 files {
-  'config.jsonc',
-    'build/web/index.html',
-    'build/web/js/index.js',
-    'build/web/styles/index.css'
+  'packages/ui/dist/index.html',
+  'packages/ui/dist/*',
+  'packages/ui/dist/**/*',
+  'packages/ui/dist/**/**/*',
 }
+
+ui_page 'packages/ui/dist/index.html'
