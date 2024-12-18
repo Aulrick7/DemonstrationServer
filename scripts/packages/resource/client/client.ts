@@ -1,15 +1,16 @@
 import { ClientUtils, RegisterNuiCB } from '@project-error/pe-utils'
 
+
 const rpc = new ClientUtils()
 
 const Delay = (time: number) => new Promise(resolve => setTimeout(resolve, time));
 
 RegisterNuiCB("spawnCar",async (data, cb) => {
 	const model = data.model;
-  if (!data.model) 
-    return cb('No model Provided');
-  if(!model)
-    return console.error('No model Provided');
+  if(!model){
+    return cb(false);
+  }
+    
   console.log('spawning car', model);
   
 	const modelHash = GetHashKey(model)
@@ -26,6 +27,9 @@ RegisterNuiCB("spawnCar",async (data, cb) => {
 	SetPedIntoVehicle(PlayerPedId(), veh, -1)
   SetEntityAsNoLongerNeeded(veh);
   SetEntityAsNoLongerNeeded(model);
+
+  emitNet('addVehicle', model);
+  return cb('true')
 });
 
 RegisterCommand(
@@ -37,8 +41,9 @@ RegisterCommand(
         pageName: 'vehicleSpawn',
       },
     })
-
+  
     SetNuiFocus(true, true)
+    emitNet("getHistory");
   },
   false,
 )
@@ -56,10 +61,17 @@ RegisterNuiCB('closeMenu', (_, cb) => {
 })
 
 RegisterNuiCB('getDemoData', (data, cb) => {
-  console.log(data)
-
+  emitNet('debug', data);
   cb({ demo: true, inBrowser: false })
 })
 
-
+onNet('historyRetrieved', (vehicleNames: [], dateSpawned: []) => {
+  SendNUIMessage({
+    action: 'dataRetrieved',
+    data: {
+      vehicleNames: vehicleNames,
+      dateSpawned: dateSpawned,
+    },
+  })
+})
 

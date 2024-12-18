@@ -3,28 +3,41 @@ import { usePageContext } from '../../App'
 import { fetchNui, useNuiQuery } from '../../utils/nui'
 import { useExitListener } from '../../utils/exitListener'
 import { ifError } from 'assert';
+import { oxmysql } from '@overextended/oxmysql';
 
+let vehiclePair:any = '';
+let debug:any;
+let rows:any = [];
 const vehicleSpawn = () => {
     const { closePage } = usePageContext()
     const [vehicle, setVehicle] = React.useState('');
     const [refresh, setRefresh] = React.useState(false);
     const [visible, setVisible] = React.useState(false);
-    // const app = express();
-    // app.use(cors());
+    const [vehicleNames, setVehicleNames] = React.useState([]);
+    const [dates, setDates] = React.useState([]);
     
-    // const db = mysql.createConnection({
-    //     host: '127.0.0.1',
-    //     user: 'root',
-    //     password: '',
-    //     database: 'vehicles'
-    // })
-    // app.get('/vehicleSpawned', (req: any, res: { json: (arg0: any) => any; }) => {
-    //     const sql = "SELECT * FROM vehicleSpawned";
-    //     db.query(sql, (err: any, data: any) => {
-    //         if(err) return res.json(err)
-    //         return res.json(data); 
-    //     })
-    // })
+    // const [vehiclePair, setVehiclePair] = React.useState(Map);
+    useEffect( () => {
+      function handleMessage(event: { data: any }) {
+        const data = event.data
+        
+        if(data.action == 'dataRetrieved'){
+          if(!data.data){
+            setVisible(false)
+          }
+          else{
+            setVisible(true)
+            fetchNui('getDemoData', data.data.vehicleNames.length);
+            setHistory(data.data.vehicleNames, data.data.dateSpawned)
+          }
+        }
+      }
+    
+      window.addEventListener('message', handleMessage)
+      return () => {
+        window.removeEventListener('message', handleMessage)
+      }
+    }, [])
     const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
         setVehicle(e.target.value);
     }
@@ -34,22 +47,30 @@ const vehicleSpawn = () => {
     }
     const handleSubmit = () => {
         sendDataToFiveM(vehicle)
-        setVehicle('');
-        addVehicle(vehicle)
-        close();
     }
     const sendDataToFiveM = (model: any) => {
         const data = {model}
-        fetchNui('spawnCar', data)
+        if(!model){
+          fetchNui('getDemoData', 'error');
+        }
+        else{
+          fetchNui('spawnCar', data)
+          close();
+        }
         setRefresh(!refresh);
+        
     }
     useExitListener(async () => {
       await close()
     })
-    
-    function addVehicle(model:String){
-      const ox = global.exports('oxmysql');
-      ox.execute('INSERT INTO vehicleSpawned (vehicleSpawned, dateSpawned) VALUES (?, CURRENT_TIMESTAMP)', model)
+    function setHistory(vehicleNames: [], dateSpawned: []){
+      for(let i = 0; i < vehicleNames.length; i++){
+        rows.push(
+          <tr key={i}>
+          <td>{vehicleNames[i]}</td>
+          <td>{dateSpawned[i]}</td>
+          </tr>)
+      }
     }
   
     return (
@@ -68,14 +89,9 @@ const vehicleSpawn = () => {
                     <th>Vehicle Spawned</th>
                     <th>Time Stamp</th>
                   </thead>
-                  {/* <tbody>
-                    {data.map((d, i) => (
-                      <tr key={i}>
-                        <td>{d.vehicleSpawned}</td>
-                        <td>{d.timeStamp}</td>
-                      </tr>
-                    ))}
-                  </tbody> */}
+                  <tbody>
+                    {rows}               
+                  </tbody>
                 </table>
             </div>
           </div>

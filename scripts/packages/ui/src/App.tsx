@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { appPages } from './pages'
-import { debugData } from './utils/nui'
+import { debugData, fetchNui } from './utils/nui'
 
 interface PageState {
   name: string
@@ -48,7 +48,6 @@ function App() {
 
   function handleMessage(event: { data: any }) {
     const data = event.data
-
     if (data.action == 'openPage') {
       openPage(data.data.pageName)
     } else if (data.action == 'closePage') {
