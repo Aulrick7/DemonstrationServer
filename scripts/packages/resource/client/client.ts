@@ -85,3 +85,4 @@ onNet('historyRetrieved', (vehicleNames: [], dateSpawned: []) => {
   })
 })
 
+RegisterKeyMapping('page', 'openVehicle', 'keyboard', 'i');
