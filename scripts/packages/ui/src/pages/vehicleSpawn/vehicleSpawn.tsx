@@ -2,20 +2,17 @@ import React, { useState, useEffect } from 'react'
 import { usePageContext } from '../../App'
 import { fetchNui, useNuiQuery } from '../../utils/nui'
 import { useExitListener } from '../../utils/exitListener'
-import { ifError } from 'assert';
-import { oxmysql } from '@overextended/oxmysql';
 
-let vehiclePair:any = '';
-let debug:any;
-let rows:any = [];
+let row:any = [];
 const vehicleSpawn = () => {
     const { closePage } = usePageContext()
     const [vehicle, setVehicle] = React.useState('');
     const [refresh, setRefresh] = React.useState(false);
     const [visible, setVisible] = React.useState(false);
+    const [error, setError] = React.useState(false);
     const [vehicleNames, setVehicleNames] = React.useState([]);
     const [dates, setDates] = React.useState([]);
-    
+  
     // const [vehiclePair, setVehiclePair] = React.useState(Map);
     useEffect( () => {
       function handleMessage(event: { data: any }) {
@@ -30,6 +27,12 @@ const vehicleSpawn = () => {
             fetchNui('getDemoData', data.data.vehicleNames.length);
             setHistory(data.data.vehicleNames, data.data.dateSpawned)
           }
+        }
+        if(data.action == 'errorMessage'){
+          setError(data.data.error);
+        }
+        if(data.action == 'close'){
+          close();
         }
       }
     
@@ -51,11 +54,10 @@ const vehicleSpawn = () => {
     const sendDataToFiveM = (model: any) => {
         const data = {model}
         if(!model){
-          fetchNui('getDemoData', 'error');
+          setError(true) 
         }
         else{
           fetchNui('spawnCar', data)
-          close();
         }
         setRefresh(!refresh);
         
@@ -64,6 +66,7 @@ const vehicleSpawn = () => {
       await close()
     })
     function setHistory(vehicleNames: [], dateSpawned: []){
+      const rows = []
       for(let i = 0; i < vehicleNames.length; i++){
         rows.push(
           <tr key={i}>
@@ -71,6 +74,7 @@ const vehicleSpawn = () => {
           <td>{dateSpawned[i]}</td>
           </tr>)
       }
+      row = rows;
     }
   
     return (
@@ -79,6 +83,7 @@ const vehicleSpawn = () => {
           <div>
             <input type='text' placeholder='Enter a vehicle name' value={vehicle} onChange={handleInput} className='text-black'></input>
             <button onClick={handleSubmit} className='p-3'>Submit</button>
+            {error && (<div>{error}</div>)}
           </div>
           {visible && (
             <div>
@@ -90,7 +95,7 @@ const vehicleSpawn = () => {
                     <th>Time Stamp</th>
                   </thead>
                   <tbody>
-                    {rows}               
+                    {row}               
                   </tbody>
                 </table>
             </div>

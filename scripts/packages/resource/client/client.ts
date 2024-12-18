@@ -7,29 +7,39 @@ const Delay = (time: number) => new Promise(resolve => setTimeout(resolve, time)
 
 RegisterNuiCB("spawnCar",async (data, cb) => {
 	const model = data.model;
-  if(!model){
-    return cb(false);
-  }
-    
   console.log('spawning car', model);
   
 	const modelHash = GetHashKey(model)
-
 	RequestModel(modelHash)
-	while (!HasModelLoaded) await Delay(500)
+  if(IsModelValid(modelHash) && IsModelAVehicle(modelHash)){
+    while (!HasModelLoaded(modelHash)) {
+      await Delay(500)
+    }
+    const [x,y,z] = GetEntityCoords(PlayerPedId(), true)
+	  const h = GetEntityHeading(PlayerPedId())
+	  const veh = CreateVehicle(modelHash,x,y,z,h, true, true)
 
-	const [x,y,z] = GetEntityCoords(PlayerPedId(), true)
-	const h = GetEntityHeading(PlayerPedId())
-	const veh = CreateVehicle(modelHash,x,y,z,h, true, true)
+	  while (!DoesEntityExist(veh)) await Delay(100)
 
-	while (!DoesEntityExist(veh)) await Delay(100)
+	  SetPedIntoVehicle(PlayerPedId(), veh, -1)
+    SetEntityAsNoLongerNeeded(veh);
+    SetEntityAsNoLongerNeeded(modelHash);
 
-	SetPedIntoVehicle(PlayerPedId(), veh, -1)
-  SetEntityAsNoLongerNeeded(veh);
-  SetEntityAsNoLongerNeeded(model);
+    emitNet('addVehicle', model);
+    SendNUIMessage({
+      action: 'close'
+    })
+  }
+	else{
+    SendNUIMessage({
+      action: 'errorMessage',
+      data: {
+        error: 'Vehicle does not exist',
+      },
+    })
+    
+  }
 
-  emitNet('addVehicle', model);
-  return cb('true')
 });
 
 RegisterCommand(
