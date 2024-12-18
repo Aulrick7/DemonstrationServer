@@ -64,18 +64,23 @@ onNet('getHistory', ()=> {
   const player = global.source;
   const ID = getPlayerIdentifiers(player);
   const discordid = ID[1];
-  ox.execute('SELECT * FROM `?`', [discordid], (result:any) => {
-    if(result.length > 0){
-      const vehicleNames = []
-      const dateSpawned = [Date]
-      for(let i = 0; i < result.length; i++){
-        vehicleNames[i] = result[i].vehicleSpawned;
-        dateSpawned[i] = result[i].dateSpawned;
-      }
-      emitNet('historyRetrieved', player, vehicleNames, dateSpawned)
+  ox.execute('CREATE TABLE IF NOT EXISTS users (id INT NOT NULL AUTO_INCREMENT,discord VARCHAR(255) NOT NULL DEFAULT 0,PRIMARY KEY (id))', (result:any) => {
+    if(result.length != 0){
+      ox.execute('SELECT * FROM `?`', [discordid], (result:any) => {
+        if(result.length > 0){
+          const vehicleNames = []
+          const dateSpawned = [Date]
+          for(let i = 0; i < result.length; i++){
+            vehicleNames[i] = result[i].vehicleSpawned;
+            dateSpawned[i] = result[i].dateSpawned;
+          }
+          emitNet('historyRetrieved', player, vehicleNames, dateSpawned)
+        }
+    
+      })
     }
-
   })
+  
     
   
 })
